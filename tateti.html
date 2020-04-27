@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TaTeTi</title>
+    <link rel="stylesheet" type="text/css" href="tateti.css">
+    <script src="tateti.js"></script>
+    <script>
+        let n = 3; //game size
+
+        // statistics
+        let count_X = 0;
+        let count_O = 0;
+        let count_tie = 0;
+
+        let playing = false;
+
+        let current_player = 0; //current_player
+        let next_first_player = 0; //next_firts
+
+        let board = Array.from({
+            length: n
+        }, () => new Array(n).fill(0)); // nxn array to store X,O
+
+        let cell_count = 0; // squares with value
+
+        let cellClick = function (cell, i, j) {
+            if (!playing) return;
+            if (board[i][j] !== 0) {
+                alert('Selecciona una celda vacía.')
+                return;
+            }
+            setCellLabel(cell);
+            cell_count++;
+            board[i][j] = current_player;
+            // let winner = validateWinner(board, n, current_player);
+            if (validateWinner(board, n, current_player)) {
+                setWinner();
+            } else {
+                if (cell_count === n * n) { //se setearon todas las celdas- Empate.
+                    count_tie++;
+                    playing = false
+                    document.getElementById("count_tie").value = count_tie;
+                    document.getElementById("status_div").hidden = false;
+                    document.getElementById("status_message").innerHTML = "Empatarón!";
+                } else {
+                    setNextTurn();
+                }
+            }
+        }
+
+        function setCellLabel(cell) {
+            if (current_player === 1) { //player1
+                cell.innerHTML = 'X';
+            } else { // player2
+                cell.innerHTML = 'O';
+            }
+        }
+
+        function setWinner() {
+            let winner_name;
+            playing = false;
+            if (current_player === 1) {
+                winner_name = document.getElementById("player1").value
+                count_X++;
+                document.getElementById("count_player1").value = count_X;
+            } else {
+                winner_name = document.getElementById("player2").value
+                count_O++;
+                document.getElementById("count_player2").value = count_O;
+            }
+            document.getElementById("status_div").hidden = false;
+            document.getElementById("status_message").innerHTML = "Felicitaciones " +
+                winner_name +
+                "! Ganaste esta partida.";
+        }
+
+        function continuePlaying() {
+            resetBoard();
+            document.getElementById("status_div").hidden = true;
+            document.getElementById("status_message").getElementsByTagName("h1").innerHTML = "";
+            playing = true;
+            setNextFirstPlayer();
+            setTurnLabel()
+        }
+
+        function startGame() {
+            current_player = getFirstPlayer();
+            setNextFirstPlayer();
+            setTurnLabel();
+            playing = true;
+            document.getElementById("button_play").disabled = true;
+            document.getElementById("button_reset").disabled = false;
+            // disable players name
+            document.getElementById("player1").readOnly = true;
+            document.getElementById("player2").readOnly = true;
+        }
+
+        function getFirstPlayer() {
+            let random = Math.round((Math.random()) + 1); // 1 o 2
+            return random;
+        }
+
+        function setNextFirstPlayer() {
+            if (current_player === 1) {
+                next_first_player = 2;
+            } else {
+                next_first_player = 1;
+            }
+        }
+
+        function setTurnLabel() {
+            if (current_player === 1) {
+                document.getElementById("turn").value = document.getElementById("player1").value + " ( X )."
+            } else {
+                document.getElementById("turn").value = document.getElementById("player2").value + " ( O )."
+            }
+        }
+
+        function setNextTurn() {
+            if (current_player === 1) {
+                current_player = 2;
+            } else {
+                current_player = 1;
+            }
+            setTurnLabel();
+        }
+
+        function resetBoard() {
+            var trs = document.getElementById("board").getElementsByTagName('tr');
+            for (i = 0; i < n; i++) {
+                var tds = trs[i].getElementsByTagName("td")
+                for (let j = 0; j < n; j++) {
+                    tds[j].innerHTML = "";
+                }
+            }
+
+            board = Array.from({
+                length: n
+            }, () => new Array(n).fill(0)); // nxn array to store X,O
+
+            cell_count = 0; // squares with value
+
+            current_player = next_first_player;
+        }
+
+        function resetCounts() {
+            // statistics
+            count_X = 0;
+            count_O = 0;
+            count_tie = 0;
+
+        }
+
+        function resetGame() {
+            resetBoard();
+            resetCounts();
+            playing = false;
+            document.getElementById("player1").value = "";
+            document.getElementById("player2").value = "";
+            document.getElementById("player1").readOnly = false;
+            document.getElementById("player2").readOnly = false;
+            document.getElementById("button_play").disabled = false;
+            document.getElementById("button_reset").disabled = true;
+            document.getElementById("count_player1").value = 0;
+            document.getElementById("count_player2").value = 0;
+            document.getElementById("count_tie").value = 0;
+            document.getElementById("turn").value = "";
+        }
+    </script>
+</head>
+
+<body>
+    <div class="content">
+        <!-- Title -->
+        <h1>TaTeTi</h1>
+        <p>El juego consiste en colocar 3 X u O en linea recta, en cualquier dirección (horizontal, vertical o
+            diagonal).
+        </p>
+
+        <!-- FieldSet Players selection -->
+        <fieldset>
+            <legend>Players</legend>
+            <p>
+                <label for="player1">Player1 ( X ):</label>
+                <input type="text" name="player1" id="player1" placeholder="nombre jugador 1">
+            </p>
+            <p>
+                <label for="player2">Player2 ( O ):</label>
+                <input type="text" name="player2" id="player2" placeholder="nombre jugador 2">
+            </p>
+            <button id="button_play" onclick="startGame()">Jugar</button>
+            <button id="button_reset" disabled onclick="resetGame()">Reiniciar
+                Juego</button>
+        </fieldset>
+
+        <!-- FieldSet Game Info -->
+        <fieldset>
+            <legend>Info</legend>
+            <p>
+                <label for="count_player1">Ganados Player1 ( X ):</label>
+                <input type="text" name="count_player1" id="count_player1" value="0" readonly disabled>
+            </p>
+            <p>
+                <label for="count_player2">Ganados Player2 ( O ):</label>
+                <input type="text" name="count_player2" id="count_player2" value="0" readonly disabled>
+            </p>
+            <p>
+                <label for="count_tie">Empatados:</label>
+                <input type="text" name="count_tie" id="count_tie" value="0" readonly disabled>
+            </p>
+            <hr>
+            <p>
+                <label for="turn">Turno:</label>
+                <input type="text" name="turn" id="turn" value="" readonly disabled>
+            </p>
+            <hr>
+            <div id="status_div" hidden="true">
+                <h1 id="status_message"></h1>
+                <button type="button" onclick="continuePlaying()">Seguir jugando</button>
+            </div>
+        </fieldset>
+
+        <!-- Board -->
+        <table id="board">
+            <tbody>
+                <tr>
+                    <td onclick="cellClick(this,0,0)"></td>
+                    <td onclick="cellClick(this,0,1)"></td>
+                    <td onclick="cellClick(this,0,2)"></td>
+                </tr>
+                <tr>
+                    <td onclick="cellClick(this,1,0)"></td>
+                    <td onclick="cellClick(this,1,1)"></td>
+                    <td onclick="cellClick(this,1,2)"></td>
+                </tr>
+                <tr>
+                    <td onclick="cellClick(this,2,0)"></td>
+                    <td onclick="cellClick(this,2,1)"></td>
+                    <td onclick="cellClick(this,2,2)"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

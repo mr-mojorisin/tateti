@@ -1,0 +1,23 @@
+body {
+    background-color: linen;
+}
+
+h1 {
+    color: maroon;
+}
+
+.content {
+    max-width: 500px;
+    margin: auto;
+}
+
+td {
+    border: 1px solid maroon;
+    text-align: center;
+    text-transform: capitalize;
+    color: maroon;
+    height: 100px;
+    width: 100px;
+    cursor: pointer;
+    font-size: 2em;
+}
